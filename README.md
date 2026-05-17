@@ -1,172 +1,72 @@
-// Programa para criar provas personalizadas
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Provas Automático</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        #resultado { margin-top: 20px; white-space: pre-wrap; background: #e9ecef; padding: 15px; border-radius: 4px; display: none; }
+        .btn-print { background-color: #28a745; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
 
-class Questao {
-    constructor(numero, enunciado, tipo, alternativas = null, respostaCorreta = null) {
-        this.numero = numero;
-        this.enunciado = enunciado;
-        this.tipo = tipo;
-        this.alternativas = alternativas;
-        this.respostaCorreta = respostaCorreta;
-    }
-
-    exibir() {
-        console.log(`\n${this.numero}. ${this.enunciado}`);
-        if (this.tipo === 'objetiva' && this.alternativas) {
-            for (let letra in this.alternativas) {
-                console.log(`   ${letra}) ${this.alternativas[letra]}`);
-            }
-        } else if (this.tipo === 'dissertativa') {
-            console.log('   (Questão dissertativa)');
-            console.log('   Resposta: ___________________________________');
-        }
-    }
-}
-
-class Prova {
-    constructor(professor, escola, assunto, questoes, pesos, modoGeral) {
-        this.professor = professor;
-        this.escola = escola;
-        this.assunto = assunto;
-        this.questoes = questoes;
-        this.pesos = pesos;
-        this.modoGeral = modoGeral;
-    }
-
-    exibirProva() {
-        console.log('\n' + '='.repeat(60));
-        console.log(`PROVA ELABORADA POR: ${this.professor}`);
-        console.log(`ESCOLA: ${this.escola}`);
-        console.log(`ASSUNTO: ${this.assunto}`);
-        console.log(`MODO GERAL: ${this.modoGeral === 'objetiva' ? 'Objetiva' : 'Dissertativa'}`);
-        console.log('='.repeat(60));
-        
-        let notaTotal = 0;
-        for (let peso of this.pesos) {
-            notaTotal += peso;
-        }
-        console.log(`Valor total da prova: ${notaTotal} pontos\n`);
-        
-        for (let questao of this.questoes) {
-            questao.exibir();
-        }
-        
-        console.log('\n' + '='.repeat(60));
-        console.log('BOA PROVA!');
-    }
-}
-
-// Função para gerar questão baseada no conteúdo
-function gerarQuestao(numero, tipo, conteudo) {
-    const questoesObjetivas = [
-        `Com base no conteúdo: "${conteudo.substring(0, 50)}...", qual é o principal conceito abordado?`,
-        `De acordo com o material, qual das alternativas melhor define o tema central?`,
-        `Sobre o conteúdo apresentado, é CORRETO afirmar que:`,
-        `Considerando o texto, qual fator é determinante para o entendimento do assunto?`,
-        `Analisando o conteúdo, podemos concluir que:`
-    ];
+<div class="container">
+    <h2>📝 Gerador de Provas</h2>
     
-    const questoesDissertativas = [
-        `Disserte sobre os principais pontos abordados no conteúdo: "${conteudo.substring(0, 50)}..."`,
-        `Explique detalhadamente a importância do tema apresentado no contexto atual.`,
-        `Analise criticamente o conteúdo, destacando seus aspectos mais relevantes.`,
-        `Desenvolva um texto dissertativo sobre as implicações práticas do assunto estudado.`,
-        `Compare e contraste as diferentes perspectivas apresentadas no material.`
-    ];
-    
-    let enunciado;
-    let alternativas = null;
-    let respostaCorreta = null;
-    
-    if (tipo === 'objetiva') {
-        const indice = (numero - 1) % questoesObjetivas.length;
-        enunciado = questoesObjetivas[indice];
-        
-        // Gerar 5 alternativas
-        alternativas = {
-            'a': `${conteudo.split(' ')[0] || 'Conceito A'} - Primeira interpretação do tema`,
-            'b': `${conteudo.split(' ')[1] || 'Conceito B'} - Segunda abordagem do conteúdo`,
-            'c': `${conteudo.split(' ')[2] || 'Conceito C'} - Terceira perspectiva analisada`,
-            'd': 'Todas as alternativas anteriores estão corretas',
-            'e': 'Nenhuma das alternativas anteriores está correta'
-        };
-        respostaCorreta = 'c'; // Resposta padrão para exemplo
-    } else {
-        const indice = (numero - 1) % questoesDissertativas.length;
-        enunciado = questoesDissertativas[indice];
-    }
-    
-    return new Questao(numero, enunciado, tipo, alternativas, respostaCorreta);
-}
+    <div class="form-group">
+        <label for="apiKey">Sua API Key do Gemini (Cole aqui):</label>
+        <input type="password" id="apiKey" placeholder="AIzaSy...">
+    </div>
+    <hr>
 
-// Função principal interativa
-function criarProva() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-    
-    console.log('='.repeat(60));
-    console.log('SISTEMA DE CRIAÇÃO DE PROVAS');
-    console.log('='.repeat(60));
-    
-    rl.question('Nome do professor: ', (professor) => {
-        rl.question('Nome da escola: ', (escola) => {
-            rl.question('Assunto abordado: ', (assunto) => {
-                rl.question('Quantidade de questões: ', (qtdQuestoes) => {
-                    const numQuestoes = parseInt(qtdQuestoes);
-                    
-                    rl.question('Modo geral da prova (objetiva/dissertativa): ', (modoGeral) => {
-                        const modo = modoGeral.toLowerCase();
-                        if (modo !== 'objetiva' && modo !== 'dissertativa') {
-                            console.log('Modo inválido! Usando modo misto.');
-                        }
-                        
-                        console.log('\nAgora, informe o peso de cada questão:');
-                        const pesos = [];
-                        let contador = 0;
-                        
-                        function perguntarPeso() {
-                            if (contador < numQuestoes) {
-                                rl.question(`Peso da questão ${contador + 1}: `, (peso) => {
-                                    pesos.push(parseFloat(peso));
-                                    contador++;
-                                    perguntarPeso();
-                                });
-                            } else {
-                                console.log('\n' + '='.repeat(60));
-                                console.log('DIGITE O CONTEÚDO DA PROVA:');
-                                console.log('(O sistema usará este texto para gerar as questões)');
-                                console.log('='.repeat(60));
-                                
-                                rl.question('Conteúdo: ', (conteudo) => {
-                                    // Gerar questões baseadas no conteúdo
-                                    const questoes = [];
-                                    for (let i = 0; i < numQuestoes; i++) {
-                                        const tipoQuestao = modo === 'objetiva' ? 'objetiva' : 
-                                                          modo === 'dissertativa' ? 'dissertativa' :
-                                                          (i % 2 === 0 ? 'objetiva' : 'dissertativa');
-                                        const questao = gerarQuestao(i + 1, tipoQuestao, conteudo);
-                                        questoes.push(questao);
-                                    }
-                                    
-                                    const prova = new Prova(professor, escola, assunto, questoes, pesos, modo);
-                                    prova.exibirProva();
-                                    
-                                    rl.close();
-                                });
-                            }
-                        }
-                        
-                        perguntarPeso();
-                    });
-                });
-            });
-        });
-    });
-}
+    <div class="form-group">
+        <label for="nomeEscola">Nome da Escola / Instituição:</label>
+        <input type="text" id="nomeEscola" placeholder="Ex: Colégio Machado de Assis">
+    </div>
+    <div class="form-group">
+        <label for="nomeProfessor">Nome do Professor(a):</label>
+        <input type="text" id="nomeProfessor" placeholder="Ex: Prof. Carlos Silva">
+    </div>
+    <div class="form-group">
+        <label for="assunto">Assunto Abordado:</label>
+        <input type="text" id="assunto" placeholder="Ex: Fotossíntese e Respiração Celular">
+    </div>
 
-// Executar o programa
-if (typeof require !== 'undefined' && require.main === module) {
-    criarProva();
-}
+    <div class="form-group">
+        <label for="qtdQuestoes">Quantidade de Questões:</label>
+        <input type="number" id="qtdQuestoes" min="1" max="20" value="5">
+    </div>
+    <div class="form-group">
+        <label for="pesoQuestao">Peso / Valor de cada questão:</label>
+        <input type="number" id="pesoQuestao" step="0.1" value="2.0">
+    </div>
+    <div class="form-group">
+        <label for="tipoQuestao">Tipo de Questão:</label>
+        <select id="tipoQuestao">
+            <option value="objetiva">Objetiva (Múltipla Escolha: A, B, C, D, E)</option>
+            <option value="dissertativa">Dissertativa (Resposta Aberta)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="conteudoBase">Cole aqui o texto/conteúdo base para criar as questões:</label>
+        <textarea id="conteudoBase" rows="6" placeholder="Cole o texto de apoio, capítulos de livro ou anotações aqui..."></textarea>
+    </div>
+
+    <button onclick="gerarProva()">Gerar Prova com IA</button>
+    <button class="btn-print" id="btnPrint" onclick="imprimirProva()">Imprimir Prova</button>
+
+    <div id="resultado"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
